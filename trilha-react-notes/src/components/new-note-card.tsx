@@ -45,7 +45,7 @@ export function NewNoteCard() {
         <Dialog.Content className="fixed overflow-hidden left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 max-w-[640px] w-full h-[60vh] bg-slate-700 rounded-md flex flex-col outline-none">
           <Dialog.Close
             className="absolute top-5 right-5 bg-slate-800 p-1.5 text-slate-400 hover:text-slate-100 focus-visible:ring-2 focus-visible:ring-lime-400 outline-none"
-            onClick={handleStartEditor}
+            onClick={() => setShouldShowOnboarding(true)}
           >
             <X className="size-5" />
           </Dialog.Close>
