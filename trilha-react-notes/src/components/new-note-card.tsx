@@ -1,5 +1,5 @@
 import * as Dialog from '@radix-ui/react-dialog'
-import { X, Mic, Type } from 'lucide-react'
+import { X, Mic } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import profanity from 'profanity-js'
