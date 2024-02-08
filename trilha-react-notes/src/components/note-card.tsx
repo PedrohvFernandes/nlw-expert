@@ -10,18 +10,23 @@ interface INoteCardProps {
   // Melhor pratica é usar Readonly para garantir que a propriedade não será alterada
   // Outra pratica boa é ditar o que é esse date e content, no caso note. logo o dev ja vai saber para que essa data e conteudo serve
   note: {
+    id: string
     date: Date
     content: string
   }
+  onDeleteNote: (id: string) => void
 }
 
-export function NoteCard({ note }: Readonly<INoteCardProps>) {
+export function NoteCard({ note, onDeleteNote }: Readonly<INoteCardProps>) {
   return (
     <Dialog.Root>
       {/* // Ring é uma borda que aparece quando o elemento é focado, mas que na
       real é um shadow // o focus visible é para quando o elemento é focado, ele
       aparece, por exemplo com tab // o focus normal aplica o css quando o
-      elemento é focado ou clicado */}
+      elemento é focado ou clicado
+      
+        overflow-hidden -> Esconde o conteudo da nota caso ele passe do tamanho do elemento, ou seja, se o conteudo da nota passar do tamanho do elemento, ele vai ser escondido
+      */}
       {/* Trigger nada mais é que um button */}
       <Dialog.Trigger className="rounded-md text-left flex flex-col bg-slate-800 p-5 gap-3 overflow-hidden relative hover:ring-2  hover:ring-slate-600 focus-visible:ring-2 focus-visible:ring-lime-400 outline-none">
         <span className="text-sm font-medium text-slate-300">
@@ -62,7 +67,7 @@ export function NoteCard({ note }: Readonly<INoteCardProps>) {
 
           overflow-hidden -> esconde o conteudo que passa do tamanho do elemento, ou seja, se o conteudo passar do tamanho do elemento, ele vai ser escondido. Nesse caso pela div ter bordas arredondadas, o button por padrão passa por cima disso, então acaba que tira o efeito de borda arredondada no final da div, para resolver isso é necessário colocar overflow-hidden, para que o conteudo que passar do tamanho do elemento seja escondido, porque é como se o button(de apagar a nota) estivesse por cima da div. Entao o overflow-hidden faz com que qualquer elemento interno que ocupe mais espaço do que o elemento pai, seja escondido
         */}
-        <Dialog.Content className="fixed overflow-hidden left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 max-w-[640px] w-full h-[60vh] bg-slate-700 rounded-md flex flex-col outline-none">
+        <Dialog.Content className="fixed overflow-hidden inset-0 md:inset-auto md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:max-w-[640px] w-full md:h-[60vh] bg-slate-700 rounded-md flex flex-col outline-none break-words">
           {/* Close- botão de fechamento 
             p-1.5 -> padding de 1.5 x 4 = 6px(Lembrando que o tailwindCss segue esse padrão por conta dos design systems)
           */}
@@ -95,6 +100,7 @@ export function NoteCard({ note }: Readonly<INoteCardProps>) {
           <button
             type="button"
             className="w-full bg-slate-800 py-4 text-center text-sm text-slate-300 outline-none font-medium group"
+            onClick={() => onDeleteNote(note.id)}
           >
             Deseja{' '}
             <span className="text-red-400 group-hover:underline group-focus-visible:underline">
