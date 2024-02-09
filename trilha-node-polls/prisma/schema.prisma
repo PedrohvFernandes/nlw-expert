@@ -1,0 +1,23 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// O nome do model tem que começar com letra maiuscula 
+model Poll {
+  // Dica: quando se trata de uma enquete, o recomendado é que se crie dois id um numerico(para ter facilidade de achar em um banco de dados...) e outro external uuid servindo de pesquisa na url, para que os usuarios nao tenham facilidade de achar outras entidades. O recomendado é deixar como uuid(string) o id primario que nao seja numerico, ou faz ambos: um external id como uuid e esse id primario como numerico. se o id primario for um id numerico o problema pode ser esse http://localhost:3333/1 http://localhost:3333/2, ou seja, usuarios vao conseguir achar outras entidades(enquetes nesse caso) com facilidade, e isso não é legal se tratando de enquetes
+  id        String   @id @default(uuid())
+  title     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  // Pode mudar o nome do model pelo map:
+  @@map("polls")
+}
