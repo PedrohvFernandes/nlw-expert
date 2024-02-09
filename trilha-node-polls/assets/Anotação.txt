@@ -2,9 +2,9 @@ Basicamente a aplicação vai funcionar da seguinte forma: o user vai poder cria
 
 Mas o vote só pode ser dado uma vez por usuário, ou seja, se o usuário já votou em uma enquete(polls), ele não pode votar de novo. E ele vai ser atualizado via protocolo WebSocket, mantendo tudo sincronizado com a aplicação front-end. Ou seja, nao precisa ficar atualizando a pagina para um new vote.
 
-Para solucionar o problema de ficar fazendo muitos calculos no banco de dados principal, vamos usar dois bancos de dados o postgres e o redis. O postgres vai ser usado para guardar os dados principais e o redis vai ter os mesmos dados do postgres, mas vai ser usado para fazer os calculos de votos e manter as informações em cache, para nao ter que ficar fazendo requisição para o banco de dados principal.
+Para solucionar o problema de ficar fazendo muitos cálculos no banco de dados principal, vamos usar dois bancos de dados o postgres e o redis. O postgres vai ser usado para guardar os dados principais e o redis vai ter os mesmos dados do postgres, mas vai ser usado para fazer os cálculos de votos e manter as informações em cache, para nao ter que ficar fazendo requisição para o banco de dados principal.
 
-Ou seja, ao carregar pela primeira vez a aplicação vai ser feito o carregamentos das informações do postgres para o redis(que fica na maquina do usuario(cache)), e a partir dai, todas as operações de votos vão ser feitas no redis. Mas tanto o postgres quanto o redis vão ser atualizados. So que agora para o usuario nao ficar tendo que pegar as informações do banco de dados principal toda hora(tendo ter que ficar fazendo calculos por la...), vamos usar o redis para fazer o cache das informações, porque ele é um banco de memoria, sendo um banco mais leve e mais rapido para ter acesso as informações.
+Ou seja, ao carregar pela primeira vez a aplicação vai ser feito o carregamentos das informações do postgres para o redis(que fica na maquina do usuário(cache)), e a partir dai, todas as operações de votos vão ser feitas no redis. Mas tanto o postgres quanto o redis vão ser atualizados. So que agora para o usuário nao ficar tendo que pegar as informações do banco de dados principal toda hora(tendo ter que ficar fazendo cálculos por la...), vamos usar o redis para fazer o cache das informações, porque ele é um banco de memoria, sendo um banco mais leve e mais rápido para ter acesso as informações.
 
 
 https://github.com/microsoft/TypeScript/wiki/Node-Target-Mapping --> mapeamento de config do arquivo tsconfig.json(npx tsc --init)
@@ -12,15 +12,15 @@ https://github.com/microsoft/TypeScript/wiki/Node-Target-Mapping --> mapeamento 
 
 Banco de dados e docker: Banco de dados postgres(relacional) porque hoje ele é um banco de dados mais usado e open source gratuito para aplicações web
 
-o redis porque ele é em cache(em memoria), rapido e leve, usar ele para fazer os calculos de votos e manter as informações em cache, para nao ter que ficar fazendo requisição para o banco de dados principal. 
+o redis porque ele é em cache(em memoria), rápido e leve, usar ele para fazer os cálculos de votos e manter as informações em cache, para nao ter que ficar fazendo requisição para o banco de dados principal. 
 
-poderiamos usar o postgres usando algum serviço de banco ou subir algum banco na nuvem, so que a requisição para um banco de dados na nuvem, pode ser mais lento e mais caro.
+poderíamos usar o postgres usando algum serviço de banco ou subir algum banco na nuvem, so que a requisição para um banco de dados na nuvem, pode ser mais lento e mais caro.
 
-Outro caso seria instalar o postgres na maquina local e usar uma instancia do postgres na maquina local, mas ai seria ruim usar uma so instancia para todas as minhas aplicações, e isso é ruim porque talvez a uma aplicação em si requer uma extensão do postgres que outra aplicação nao requer, e isso pode dar conflito ou pesar a maquina, gerando conflito em todas as aplicações. Os containers(dockers) vieram para nos ajudar nisso, pois eles criam ambientes de desenvolvimento e para produção isolados, ou seja, cada aplicação tem seu proprio ambiente de desenvolvimento e produção, e isso é bom porque nao vai ter conflito entre as aplicações, tudo fica isolado para cada aplicação(back ou front...), cada aplicação vai possuir sua propria instancia seja do postgres, do redis... no fim não compartilhamos recursos entre as aplicações.
+Outro caso seria instalar o postgres na maquina local e usar uma instancia do postgres na maquina local, mas ai seria ruim usar uma so instancia para todas as minhas aplicações, e isso é ruim porque talvez a uma aplicação em si requer uma extensão do postgres que outra aplicação nao requer, e isso pode dar conflito ou pesar a maquina, gerando conflito em todas as aplicações. Os containers(dockers) vieram para nos ajudar nisso, pois eles criam ambientes de desenvolvimento e para produção isolados, ou seja, cada aplicação tem seu próprio ambiente de desenvolvimento e produção, e isso é bom porque nao vai ter conflito entre as aplicações, tudo fica isolado para cada aplicação(back ou front...), cada aplicação vai possuir sua própria instancia seja do postgres, do redis... no fim não compartilhamos recursos entre as aplicações.
 
 https://docs.docker.com/get-docker/
 
-.yml -> exntesion de arquivo que é usado para criar arquivos de configuração, ou seja, é um arquivo de configuração.
+.yml -> extension de arquivo que é usado para criar arquivos de configuração, ou seja, é um arquivo de configuração.
 
 apos instalar normalmente o docker, crie o arquivo docker-compose.yml na raiz do projeto. Basicamente esse arquivo é que nem receita, é os serviços que a sua aplicação precisa: postgres, redis, mysql... qualquer serviço de terceiro que a sua aplicação precisa para funcionar vai estar escrito nesse arquivo. E o mais legal disso, pelo fato de estarmos criando esse arquivo de receita, se mais pra frente outra pessoa pegar a nossa aplicação e tentar rodar essa aplicação, a pessoa simplesmente vai rodar o comando do docker para subir a aplicação e automaticamente vai ser instalado os serviços passados para esse arquivo, ou seja, tudo que a nossa aplicação precisa para funcionar.
 
@@ -29,25 +29,25 @@ Lembrando um espaço, dois pontos, aspas, hífen... no arquivo de config pode da
 
 Explicando de cada campo para cada serviço no arquivo docker-compose.yml:
 
-image: é a imagem(Criada por alguem/empresa: ex: https://hub.docker.com/r/bitnami/postgresql) nada mais é que uma receita com passos a passos para instalar e configurar o postgres, redis... o serviço que for em um ambiente linux que esteja totalmente zerado, porque o docker roda em cima de um sistema de linux zerado
+image: é a imagem(Criada por alguém/empresa: ex: https://hub.docker.com/r/bitnami/postgresql) nada mais é que uma receita com passos a passos para instalar e configurar o postgres, redis... o serviço que for em um ambiente linux que esteja totalmente zerado, porque o docker roda em cima de um sistema de linux zerado
 
-ports: redirecionamento de porta. Como o meu serviço(banco de dados postgres, redis...) vai estar rodando dentro de um container e o meu container é como se fosse uma virtualização, como se ele estivesse rodando em SO(Sistema operacional) diferente, eu preciso falar que a porta tal(ex:5432) que é a porta que postgres usa por padrão, eu quero que essa porta seja acessivel pela a minha aplicação quando eu usar o endereço localhost:5432, ou seja, quando a minha aplicação tentar acessar a porta 5432, ela vai ser redirecionada para a porta 5432 do container do postgres, ou seja, a minha aplicação vai estar acessando o banco de dados postgres que está rodando dentro do container.
+ports: redirecionamento de porta. Como o meu serviço(banco de dados postgres, redis...) vai estar rodando dentro de um container e o meu container é como se fosse uma virtualização, como se ele estivesse rodando em SO(Sistema operacional) diferente, eu preciso falar que a porta tal(ex:5432) que é a porta que postgres usa por padrão, eu quero que essa porta seja acessível pela a minha aplicação quando eu usar o endereço localhost:5432(porta do server que o banco esta), ou seja, quando a minha aplicação tentar acessar a porta 5432, ela vai ser redirecionada para a porta 5432 do container do postgres, ou seja, a minha aplicação vai estar acessando o banco de dados postgres que está rodando dentro do container.
 
-environment: variaveis de ambiente. São variaveis que a imagem do postgres, redis... precisa para funcionar. Ex: a imagem do postgres precisa de uma variavel de ambiente chamada POSTGRES_USER e POSTGRES_PASSWORD para funcionar, ou seja, a imagem do postgres precisa de um usuario e senha para funcionar. o POSTGRES_DB é o nome do banco de dados que vai ser criado quando a imagem do postgres for iniciada.
+environment: variáveis de ambiente. São variáveis que a imagem do postgres, redis... precisa para funcionar. Ex: a imagem do postgres precisa de uma variável de ambiente chamada POSTGRES_USER e POSTGRES_PASSWORD para funcionar, ou seja, a imagem do postgres precisa de um usuário e senha para funcionar, sao as credenciais para conectar no server que o banco esta. o POSTGRES_DB é o nome do banco de dados que vai ser criado quando a imagem do postgres for iniciada.
 
 volumes: É sistema de storage, quando eu subir o meu container do postgres, os dados do meu BD quero que eles fiquem persistidos mesmo que eu pare esse container, desligar o pc e iniciar ele do zero. Basicamente o volume fala para salvar os dados desta pasta /bitnami/postgresql que vao estar dentro do meu container na pasta polls_pg_data na minha maquina local. essa pasta polls_pg_data vai ficar escondida dentro da pasta de instalação do docker. E para configurar ela basta no mesmo arquivo de configuração do docker-compose.yml, criar um novo campo(seção) chamado volumes e passar o caminho da pasta que eu quero que os dados do meu container fiquem persistidos, e na seção do serviço em si(postgres) passar a pasta que eu quero que os dados do meu container fiquem persistidos.
 
 e isso é para todos os serviços usados no docker-compose.yml
 
-obs: no redis nas variaveis eu dito que nao quero usar senha, porque estamos em ambiente de desenvolvimento.
+obs: no redis nas variáveis eu dito que nao quero usar senha, porque estamos em ambiente de desenvolvimento.
 
 
 Agora so usar o comando: "docker compose up -d" para subir os serviços do postgres e redis. O -d é para rodar em segundo plano, ou seja, nao vai ficar mostrando os logs dos serviços no terminal e não precisa manter o terminal aberto para deixar os serviços rodando.
 
-apos isso as imagens serão baixadas(nao se preocupe, ele vai fazer isso automaticamente, sem voce precisar de baixar o SGBD postgres e configurar coisa por coisa na sua maquina local) e os serviços vão ser iniciados(ou seja, assim como com o sgbd de qualquer banco baixado em nossa maquina  a gente inicia o BD/server dele abrindo em tal porta pelo sgbd, o docker ira fazer isso por nos). E para ver se os serviços estão rodando, basta usar o comando: "docker ps" lista todas as instancias. obs: na primeira vez que incializar os serviços, pode demorar um pouco para os serviços estarem rodando, porque o docker vai baixar as imagens dos serviços e depois vai iniciar os serviços, mas depois ja vao iniciar direto.
+apos isso as imagens serão baixadas(nao se preocupe, ele vai fazer isso automaticamente, sem voce precisar de baixar o SGBD postgres e configurar coisa por coisa na sua maquina local) e os serviços vão ser iniciados(ou seja, assim como com o sgbd de qualquer banco baixado em nossa maquina  a gente inicia o BD/server dele abrindo em tal porta pelo sgbd, o docker ira fazer isso por nos). E para ver se os serviços estão rodando, basta usar o comando: "docker ps" lista todas as instancias. obs: na primeira vez que inicializar os serviços, pode demorar um pouco para os serviços estarem rodando, porque o docker vai baixar as imagens dos serviços e depois vai iniciar os serviços, mas depois ja vao iniciar direto.
 
 "docker logs id_do_container" -> para ver os logs do container
-ex: "docker logs 240a81c65fc1", se a ultima mensagem foi  Ready to accept connections tcp, entao o container está pronto para ser usado, pra receber conexões.
+ex: "docker logs 240a81c65fc1", se a ultima mensagem foi  Ready to accept connections tcp, então o container está pronto para ser usado, pra receber conexões.
 
 Caso nao consiga usar o docker, principalmente no windows: https://efficient-sloth-d85.notion.site/Alternativa-ao-Docker-257d08b720334b93beeff01beb96b780
 
