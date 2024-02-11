@@ -18,6 +18,54 @@ model Poll {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
 
+  // Id FK, relacionamento 1 Poll <> N Poll options
+  // Aqui sera o relacionamento dessa tabela com a tabela PoolOption, não é realmente um campo(é mais para o prisma internamente facilitar para a gente fazer querys, joins...), mas ela vai servir para relacionar as opções com essa enquete. Então quando eu quiser recuperar  as opções de tal  enquete basta eu chamar essa tabela prisma.poll e dentro dela fazer uma query das opções ligadas ao id de tal enquete
+  // 1 opção: Se eu quiser ja registrar as opções direto na criação eu posso passar direto as opções na criação da enquete(Mais recomendado), tudo isso em uma rota só, criando tudo ao mesmo tempo. Porque como eu consigo fazer as query das opções atraves do prisma.poll, eu tambem consigo inserir via create>data>options>createMany>data:options e ja criar uma tabela com essas opções relacionadas a enquente que foi criada no momento, e caso se de erro na criação de um ou de outro ocorre um rollback, desfazendo as operações antigas.
+  // 2 opção: Se quiser eu posso criar a enquente e depois as opções relacionadas a enquete passando o id da enquente que foi criada no momento, chamando prisma.pollOption na criação de muitos(createMany>data:options) passando as opções pra ela com o title e o id da poll que acabou de ser criada(Nao é muito recomendado pode dar erro), tudo isso em uma rota só. Não é recomendado, porque apesar de estarmos fazendo tudo em uma rota só, eu tenho que esperar uma operação ser concluida e depois executar a outra, e caso a outro tenha um relacionamento com a primeiro e ela de erro, a primeira nao vai ser desfeita e a segunda continua com erro e nao foi feita, sendo assim a enquete ficaria sem as opções.
+  // Basicamente a enquete vai ter um array de opçoes em string, porque as opções são assim: ['', '', '']
+  // PollOption PollOption[]
+  options PollOption[]
+
+  // 1 Poll <> N Vote. Essa enquete pode ter N votos, dessa maneira vou saber que ja votou nela em alguma das opções, fazendo uma query atraves da tabela poll para tabela vote
+  // Vote Vote[]
+  votes Vote[]
+
   // Pode mudar o nome do model pelo map:
   @@map("polls")
+}
+
+// relacionamento de poll e polloptions 1 - N(muitos). A enquete pode ter varias opções e as opções estao ligadas a uma so enquete
+// Tabela para as opções da enquete para o user votar, selecionar. Essas opções da enquete nao precisa de uma data pois a enquete em si ja vai ter a data de criação e as opções quando for criada, ou seja, se tornaria algo redundante nesse caso
+model PollOption {
+  id    String @id @default(uuid())
+  title String
+
+  // Id FK, relacionamento 1 Poll <> N Poll options
+  poll   Poll   @relation(fields: [pollId], references: [id])
+  pollId String
+
+  // Relacionamento com a tablela Vote. Aqui eu vou poder fazer uma query dessa tabela para a tabela vote para recuperar os votos e saber as pessoas que votaram ne tal opção usando o id de uma das opções da enquete eu consigo por conta desse relacionamento de 1 PollOption <> N Vote
+  // Vote Vote[]
+  votes Vote[]
+}
+
+// Para salvar os votos
+model Vote {
+  // O voto não precisa ser tão seguro, então podemos usar um id incrementado
+  id        Int      @id @default(autoincrement())
+  // Aqui eu armazendo o id da sessão daquele usuario, para saber se ele ja votou naquela enquete
+  sessionId String
+  createdAt DateTime @default(now())
+
+  // O voto sempre vai ser em uma opção especifica, relacionamento entre essa table com a table PollOption. Fk(id) da relação 1 PollOption <> N Vote
+  pollOption   PollOption @relation(fields: [pollOptionId], references: [id])
+  // Esse é o id da opção que o usuario escolheu
+  pollOptionId String
+
+  // Alem de relacionar com o pollOption, eu relaciono com Poll, porque alem do id da opção que o usuario selecionou(pollOption), eu tenho id da enquete em que ele votou(Poll), dessa maneira eu evito que ele vote duas ou mais vezes na mesma opção daquela enquete atraves do id da enquete. 1 Poll <> N Vote.
+  poll   Poll   @relation(fields: [pollId], references: [id])
+  pollId String
+
+  //A combinação desses dois id's são unicos, ou seja, se eu quero que um usuario(sessionId), possa votar uma unica vez na opção de uma enquete(pollId), a combinação desses registros so pode ser unica, eu so posso ter um unico registro nessa tabela que possui valores especificos desses id, ex: 1(id do sessionId) 2(id do pollId) -> formam unico, uma combinação unica, evitando do usuario votar mais vezes na mesma opção. Isso é quando geramos uma relação de muitos para muitos, dessa forma vira um so ID sessionId_pollId, tornando a busca(query) perfomatica para achar devidas informações
+  @@unique([sessionId, pollId])
 }

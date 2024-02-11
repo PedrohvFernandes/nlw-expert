@@ -2,6 +2,12 @@ Basicamente a aplicação vai funcionar da seguinte forma: o user vai poder cria
 
 Mas o vote só pode ser dado uma vez por usuário, ou seja, se o usuário já votou em uma enquete(polls), ele não pode votar de novo. E ele vai ser atualizado via protocolo WebSocket, mantendo tudo sincronizado com a aplicação front-end. Ou seja, nao precisa ficar atualizando a pagina para um new vote.
 
+Para fazer com o que o voto seja somente uma vez por usuario, poderíamos fazer um sistema de login com validação unica(cpf, telefone...) que seria a forma mais segura de evitar a votação, ou usar o ip, ou usar cookies(que não é 100% seguro, mas ja é algo).
+
+Os cookies é parecido com localstorage, mas a diferença é que eles podem ser acessados pelo back e front end
+
+Com os cookies eu consigo recuperar informações do usuário, porque o cookie fica na minha maquina, e toda vez que o usuario fizer alguma requisição, o back-end ja vai receber sempre o mesmo cookie daquele usuario, e com isso vai saber se o usuario ja passou pelo tutorial inicial do site, ou se o usuario ja votou em uma enquete, ou se o usuario ja fez login...
+
 Para solucionar o problema de ficar fazendo muitos cálculos no banco de dados principal, vamos usar dois bancos de dados o postgres e o redis. O postgres vai ser usado para guardar os dados principais e o redis vai ter os mesmos dados do postgres, mas vai ser usado para fazer os cálculos de votos e manter as informações em cache, para nao ter que ficar fazendo requisição para o banco de dados principal.
 
 Ou seja, ao carregar pela primeira vez a aplicação vai ser feito o carregamentos das informações do postgres para o redis(que fica na maquina do usuário(cache)), e a partir dai, todas as operações de votos vão ser feitas no redis. Mas tanto o postgres quanto o redis vão ser atualizados. So que agora para o usuário nao ficar tendo que pegar as informações do banco de dados principal toda hora(tendo ter que ficar fazendo cálculos por la...), vamos usar o redis para fazer o cache das informações, porque ele é um banco de memoria, sendo um banco mais leve e mais rápido para ter acesso as informações.
