@@ -54,6 +54,21 @@ export async function voteOnPoll(app: FastifyInstance) {
         })
         // Quando eu removo o voto, eu tenho que reduzir o voto da opção que foi votada, porque eu removi um voto dela. Ou seja vou no objeto que foi criado com o id da enquete, dentro dele procuro o objeto que tem o id da opção que foi votada e decremento 1 do score dela
         // Mas antes eu verifico se ja nao é 0. Eu entro no objeto que tem o id da enquete(pollId), e verifico se o id da opção( userPreviousVoteOnPoll.pollOptionId) que tambem é um objeto que possui o score como valor, se ela foi votada, ou seja, se tem algum score, se tiver eu decremento 1, se nao tiver eu nao faço nada
+        /*
+          basicamente é um objeto que tem como chave o id da enquete e como valor um objeto que tem como chave o id da opção e como valor o score, ou seja, o numero de votos que aquela opção tem. Exemplo:
+
+          poll:09359258-88b9-4ae4-8121-a66eca11c351:votes {
+
+            "51977303-e4ac-41b7-92df-2407e0dd1369": {
+              "score": 1
+            }
+            257a8014-6f54-49bb-87dd-d93b7f597412: {
+              "score": 8
+            }
+
+          }
+          para visualizar melhor https://github.com/sinajia/medis/releases/tag/win -> so baixar e conectar com o banco
+        */
         const score = Number(
           await redis.zscore(
             `poll:${pollId}:votes`,
@@ -62,18 +77,19 @@ export async function voteOnPoll(app: FastifyInstance) {
         )
 
         if (score > 0) {
+          // Decrementar o score da opção que foi votada, dentro da enquete que foi votada
           const votes = await redis.zincrby(
             `poll:${pollId}:votes`,
             -1,
             userPreviousVoteOnPoll.pollOptionId
           )
 
+          // Usando WS, para publicar a mensagem para todos inscritos no canal
           voting.publish(pollId, {
             pollOptionId: userPreviousVoteOnPoll.pollOptionId,
             votes: Number(votes)
           })
         }
-        
       } else if (userPreviousVoteOnPoll) {
         return reply.status(400).send({
           message: 'User already voted on this poll'
@@ -122,7 +138,7 @@ export async function voteOnPoll(app: FastifyInstance) {
     }
     para visualizar melhor https://github.com/sinajia/medis/releases/tag/win -> so baixar e conectar com o banco
     */
-  //  O zincrby retorna a quantidade de votos que a opção tem, ou seja, o score dela
+    //  O zincrby retorna a quantidade de votos que a opção tem, ou seja, o score dela
     const votes = await redis.zincrby(`poll:${pollId}:votes`, 1, pollOptionId)
 
     // Usando WS, para publicar a mensagem para todos inscritos no canal
