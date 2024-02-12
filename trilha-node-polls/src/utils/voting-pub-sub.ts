@@ -1,4 +1,4 @@
-// Parametros que são passados para a função que se inscreve no canal. Sao as informações que estamos carregando para enviar para o front, pra dizer quais são nos novos votos, qual opção foi votada, quantos votos tem, etc
+// Parametros que são passados para a função que se inscreve no canal. Sao as informações que estamos carregando para enviar para o front, pra dizer quais são nos novos votos, qual opção foi votada, quantos votos tem, etc, pode ser qualquer coisa, nome por exemplo
 // Ou seja, cada vez que uma mensagem for publicada dentro de um canal, essa mensagem vai conter sempre essas informações: qual foi a opção que recebeu o voto(pollOptionId) e quantos votos ela tem naquele momentos(votes)
 type Message = {
   pollOptionId: string
