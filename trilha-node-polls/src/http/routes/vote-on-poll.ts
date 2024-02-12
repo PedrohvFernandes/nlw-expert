@@ -53,7 +53,7 @@ export async function voteOnPoll(app: FastifyInstance) {
           }
         })
         // Quando eu removo o voto, eu tenho que reduzir o voto da opção que foi votada, porque eu removi um voto dela. Ou seja vou no objeto que foi criado com o id da enquete, dentro dele procuro o objeto que tem o id da opção que foi votada e decremento 1 do score dela
-        // Mas antes eu verifico se ja nao é 0
+        // Mas antes eu verifico se ja nao é 0. Eu entro no objeto que tem o id da enquete(pollId), e verifico se o id da opção( userPreviousVoteOnPoll.pollOptionId) que tambem é um objeto que possui o score como valor, se ela foi votada, ou seja, se tem algum score, se tiver eu decremento 1, se nao tiver eu nao faço nada
         const score = Number(
           await redis.zscore(
             `poll:${pollId}:votes`,
@@ -73,6 +73,7 @@ export async function voteOnPoll(app: FastifyInstance) {
             votes: Number(votes)
           })
         }
+        
       } else if (userPreviousVoteOnPoll) {
         return reply.status(400).send({
           message: 'User already voted on this poll'
