@@ -40,7 +40,7 @@ export async function voteOnPoll(app: FastifyInstance) {
         }
       })
 
-      // Se o usuario ja votou nessa enquete mas a  opção que ele votou é diferente da opção que ele esta tentando votar agora, eu deixo ele votar, apagando a anterior, se não eu retorno um erro
+      // Se o usuario ja votou nessa enquete mas a  opção que ele votou(userPreviousVoteOnPoll.pollOptionId) é diferente da opção que ele esta tentando votar(pollOptionId) agora, eu deixo ele votar, apagando a anterior, se não eu retorno um erro
       if (
         userPreviousVoteOnPoll &&
         userPreviousVoteOnPoll.pollOptionId !== pollOptionId
