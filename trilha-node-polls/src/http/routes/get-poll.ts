@@ -48,11 +48,11 @@ export async function getPoll(app: FastifyInstance) {
       /*
       Exemplo:
       index 0: id da opção
-            + 1: score da opção
+            + 1: score da opção = 1 proxima linha do array, score do id da opção
       index 1: score da opção
 
       index 2: id da opção
-            + 1: score da opção
+            + 1: score da opção = 3 proxima linha do array, score do id da opção
       index 3: score da opção
 
       index 4: ...
