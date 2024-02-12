@@ -121,6 +121,7 @@ export async function voteOnPoll(app: FastifyInstance) {
     }
     para visualizar melhor https://github.com/sinajia/medis/releases/tag/win -> so baixar e conectar com o banco
     */
+  //  O zincrby retorna a quantidade de votos que a opção tem, ou seja, o score dela
     const votes = await redis.zincrby(`poll:${pollId}:votes`, 1, pollOptionId)
 
     // Usando WS, para publicar a mensagem para todos inscritos no canal

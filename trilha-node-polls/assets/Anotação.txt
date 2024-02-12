@@ -8,9 +8,9 @@ Os cookies é parecido com localstorage, mas a diferença é que eles podem ser 
 
 Com os cookies eu consigo recuperar informações do usuário, porque o cookie fica na minha maquina, e toda vez que o usuario fizer alguma requisição, o back-end ja vai receber sempre o mesmo cookie daquele usuario, e com isso vai saber se o usuario ja passou pelo tutorial inicial do site, ou se o usuario ja votou em uma enquete, ou se o usuario ja fez login...
 
-Para solucionar o problema de ficar fazendo muitos cálculos no banco de dados principal, vamos usar dois bancos de dados o postgres e o redis. O postgres vai ser usado para guardar os dados principais e o redis vai ter os mesmos dados do postgres, mas vai ser usado para fazer os cálculos de votos e manter as informações em cache, para nao ter que ficar fazendo requisição para o banco de dados principal.
+Para solucionar o problema de ficar fazendo muitos cálculos no banco de dados principal, vamos usar dois bancos de dados o postgres e o redis. O postgres vai ser usado para guardar os dados principais(nome da enquete, quem votou, nome das opções da enquete...) e o redis vai ser somente pra fazer os calculos de ranking, para fazer os cálculos de votos e manter as informações em cache, para nao ter que ficar fazendo requisição para o banco de dados principal pra saber quantos votos tem em tal enquete.
 
-Ou seja, ao carregar pela primeira vez a aplicação vai ser feito o carregamentos das informações do postgres para o redis(que fica na maquina do usuário(cache)), e a partir dai, todas as operações de votos vão ser feitas no redis. Mas tanto o postgres quanto o redis vão ser atualizados. So que agora para o usuário nao ficar tendo que pegar as informações do banco de dados principal toda hora(tendo ter que ficar fazendo cálculos por la...), vamos usar o redis para fazer o cache das informações, porque ele é um banco de memoria, sendo um banco mais leve e mais rápido para ter acesso as informações.
+vamos usar o redis para fazer o cache das informações, porque ele é um banco de memoria, sendo um banco mais leve e mais rápido para ter acesso as informações.
 
 npm i ioredis -> para manipular o redis dentro do node, que usa a sintaxe de async/await do js para fazer as operações no redis, porque a lib oficial do redis em si usa uma sintaxe de callback, é uma sintaxe mais antiga do js.
 
