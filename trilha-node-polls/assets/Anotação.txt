@@ -12,6 +12,21 @@ Para solucionar o problema de ficar fazendo muitos cálculos no banco de dados p
 
 Ou seja, ao carregar pela primeira vez a aplicação vai ser feito o carregamentos das informações do postgres para o redis(que fica na maquina do usuário(cache)), e a partir dai, todas as operações de votos vão ser feitas no redis. Mas tanto o postgres quanto o redis vão ser atualizados. So que agora para o usuário nao ficar tendo que pegar as informações do banco de dados principal toda hora(tendo ter que ficar fazendo cálculos por la...), vamos usar o redis para fazer o cache das informações, porque ele é um banco de memoria, sendo um banco mais leve e mais rápido para ter acesso as informações.
 
+npm i ioredis -> para manipular o redis dentro do node, que usa a sintaxe de async/await do js para fazer as operações no redis, porque a lib oficial do redis em si usa uma sintaxe de callback, é uma sintaxe mais antiga do js.
+
+Com o redis vai ser possivel fazer um sistema de votação(ranking) mais rápido e mais escalável, porque o banco de dados principal nao vai ficar sobrecarregado com calculos
+
+https://redis.io/commands/zrank/ --> Sistema interno do redis, comandos do redis para fazer um sistema de votação(ranking)
+https://redis.io/commands/zincrby/
+
+Redis não é um banco relacional e ele não é um banco SQL, ele possui uma sintaxe propria pra escrever os comandos, e a lib ioredis vai facilitar eu escrever esses comandos
+
+ZINCRBY key increment member -> incrementa o valor de um membro(opção da enquete) em um conjunto ordenado. Ou seja, esse comando ZINCRBY vai incrementar(somar) na opção que estiver estipulada no parametro membro(member), dentro de uma categoria de enquete que estiver estipulada como parametro key, e o incremento vai ser o valor que estiver estipulado como increment. O key vai discriminar a enquete, ou seja, cada enquete vai possuir o seu proprio ranking e dentro de cada enquete vou ter uma pontuação(increment) pra cada member, onde cada member significa uma opção da enquete.
+
+ZRANGE -> Ele retorna uma pontuação, um ranking entre as opções mais votadas
+
+com o redis sera possivel armazenar em cache uma contagem de votos de cada uma das opções de cada uma das enquetes para que seja mais facil de obter esse dado, sempre precisar de ficar contado toda vez dentro de uma query no banco de dados principal(postgres).
+
 
 https://github.com/microsoft/TypeScript/wiki/Node-Target-Mapping --> mapeamento de config do arquivo tsconfig.json(npx tsc --init)
 

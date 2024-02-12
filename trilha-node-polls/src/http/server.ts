@@ -1,9 +1,11 @@
 import fastify from 'fastify'
-import fastifyCookie from '@fastify/cookie'
+import { fastifyCookie } from '@fastify/cookie'
+import { fastifyWebsocket } from '@fastify/websocket'
 
 import { createPoll } from './routes/create-poll'
 import { getPoll } from './routes/get-poll'
 import { voteOnPoll } from './routes/vote-on-poll'
+import { pollResults } from './ws/poll-results'
 
 // Servidor HTTP
 // const app = fastify({ logger: true });
@@ -18,10 +20,15 @@ app.register(fastifyCookie, {
   // parseOptions: {} // options for parsing cookies
 })
 
+app.register(fastifyWebsocket)
+
 // Minhas rotas
 app.register(createPoll)
 app.register(getPoll)
 app.register(voteOnPoll)
+
+// ws
+app.register(pollResults)
 
 app.listen({ port: 3333, host: '' }, (err, address) => {
   if (err) {

@@ -3,7 +3,8 @@ import z from 'zod'
 import { randomUUID } from 'node:crypto'
 
 import { FastifyInstance } from 'fastify'
-import { prisma } from '../../lib/prisma'
+import { prisma, redis } from '../../lib'
+import { voting } from '../../utils/voting-pub-sub'
 
 export async function voteOnPoll(app: FastifyInstance) {
   app.post('/polls/:pollId/votes', async (request, reply) => {
@@ -51,6 +52,27 @@ export async function voteOnPoll(app: FastifyInstance) {
             id: userPreviousVoteOnPoll.id
           }
         })
+        // Quando eu removo o voto, eu tenho que reduzir o voto da opção que foi votada, porque eu removi um voto dela. Ou seja vou no objeto que foi criado com o id da enquete, dentro dele procuro o objeto que tem o id da opção que foi votada e decremento 1 do score dela
+        // Mas antes eu verifico se ja nao é 0
+        const score = Number(
+          await redis.zscore(
+            `poll:${pollId}:votes`,
+            userPreviousVoteOnPoll.pollOptionId
+          )
+        )
+
+        if (score > 0) {
+          const votes = await redis.zincrby(
+            `poll:${pollId}:votes`,
+            -1,
+            userPreviousVoteOnPoll.pollOptionId
+          )
+
+          voting.publish(pollId, {
+            pollOptionId: userPreviousVoteOnPoll.pollOptionId,
+            votes: Number(votes)
+          })
+        }
       } else if (userPreviousVoteOnPoll) {
         return reply.status(400).send({
           message: 'User already voted on this poll'
@@ -81,6 +103,30 @@ export async function voteOnPoll(app: FastifyInstance) {
         pollId,
         pollOptionId
       }
+    })
+
+    // Incrementar o contador de votos da opção selecionada. Passamos a key(chave) que é uma forma de criamos um ranking, essa chave vai ser o id da nossa enquete, porque cada enquete ela vai ter um ranking diferente(proprio), cada enquete vai ter os seus proprios ganhadores, o seu proprio ranking,   e o id da opção(pollOptionId) que foi votada, e o valor é 1, ou seja, eu estou incrementando 1 voto para essa opção porque o voto é unico e ele sobe de 1 em 1, poderiamos colocar 2 em 2 para caso por exemplo se a pessoa fosse inscrita no meu canal. No fim essa função esta incrementando em 1 o ranking(o valor) da opção que foi votada(pollOptionId) na enquete(pollId). vai ficar mais ou menos assim: poll:09359258-88b9-4ae4-8121-a66eca11c351:votes - Score 1: 51977303-e4ac-41b7-92df-2407e0dd1369
+    /*
+    basicamente é um objeto que tem como chave o id da enquete e como valor um objeto que tem como chave o id da opção e como valor o score, ou seja, o numero de votos que aquela opção tem. Exemplo:
+
+    poll:09359258-88b9-4ae4-8121-a66eca11c351:votes {
+
+      "51977303-e4ac-41b7-92df-2407e0dd1369": {
+        "score": 1
+      }
+      257a8014-6f54-49bb-87dd-d93b7f597412: {
+        "score": 8
+      }
+
+    }
+    para visualizar melhor https://github.com/sinajia/medis/releases/tag/win -> so baixar e conectar com o banco
+    */
+    const votes = await redis.zincrby(`poll:${pollId}:votes`, 1, pollOptionId)
+
+    // Usando WS, para publicar a mensagem para todos inscritos no canal
+    voting.publish(pollId, {
+      pollOptionId,
+      votes: Number(votes)
     })
 
     return reply.status(201).send()
