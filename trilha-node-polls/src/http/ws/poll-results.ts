@@ -22,7 +22,8 @@ export async function pollResults(app: FastifyInstance) {
 
       // Pub/Sub - publish subscribers
       // Inscrever apenas nas mensagens publicadas no canal específico, ou seja, canal com o ID da enquete(`{pollId}`)
-      // Usando WS para ouvir a mensagem que foi publicada no canal da enquete, na rota vote-on-poll.ts
+      // 1 - Usando WS para ouvir a mensagem que foi publicada no canal da enquete, na rota vote-on-poll.ts. Basicamente primeiro se inscreve  entrando nessa rota, usando a função subscribe, onde ela vai armazenar as funções(inscritos(user))  e quando publicar algo ela vai chamar essas funções com o metodo publish na rota vote-on-poll.ts. E com as pessoas inscritas eu posso enviar a mensagem para elas atraves do WS
+      // Se ninguem ainda nao se inscreveu, eu crio um canal para aquela enquete, se ja tiver um canal, eu adiciono a pessoa naquele canal.
       voting.subscribe(pollId, subscribeMessage => {
         // Envia a mensagem para o cliente
         connection.socket.send(JSON.stringify(subscribeMessage))

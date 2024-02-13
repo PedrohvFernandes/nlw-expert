@@ -141,7 +141,8 @@ export async function voteOnPoll(app: FastifyInstance) {
     //  O zincrby retorna a quantidade de votos que a opção tem, ou seja, o score dela
     const votes = await redis.zincrby(`poll:${pollId}:votes`, 1, pollOptionId)
 
-    // Usando WS, para publicar a mensagem para todos inscritos no canal
+    // 2 - Usando WS, para publicar a mensagem para todos inscritos no canal
+    // Mas so vai enviar mensagem caso tenha inscritos no canal, ou seja, se alguem esta visualizando os resultados daquela enquete, se nao tiver ninguem inscrito, nao vai enviar mensagem, nao faz nada
     voting.publish(pollId, {
       pollOptionId,
       votes: Number(votes)

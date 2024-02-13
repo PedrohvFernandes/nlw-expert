@@ -22,9 +22,10 @@ class VotingPubSub {
 
   // Função que se inscreve no canal
   subscribe(pollId: string, subscriber: Subscriber) {
-    // Se dentro dos canais nao existir um canal com o id da enquete, eu crio um canal com o id da enquete. Ou seja se nenhuma pessoa não assinou os resultados daquela enquete, eu crio um canal para ela
+    // Se dentro dos canais nao existir um canal com o id da enquete, eu crio um canal com o id da enquete. Ou seja se nenhuma pessoa ainda não assinou os resultados daquela enquete, eu crio um canal para ela
     if (!this.channels[pollId]) {
       this.channels[pollId] = []
+      console.log('Criando canal para enquete', pollId)
     }
 
     // Adiciono a função(user) inscrita no canal
@@ -33,8 +34,9 @@ class VotingPubSub {
 
   // Envia as mensagens para todos inscritos no canal
   publish(pollId: string, message: Message) {
-    // Se o canal nao existir, eu nao faço nada. Se nao tiver nenhum inscrito naquele canal com aquele id, eu nao faço nada
+    // Se o canal nao existir, eu nao faço nada. Se nao tiver nenhum inscrito naquele canal com aquele id, eu nao faço nada, eu nao envio mensagem para ninguem
     if (!this.channels[pollId]) {
+      console.log('Nenhum inscrito na enquete', pollId)
       return
     }
 
